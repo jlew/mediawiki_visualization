@@ -36,7 +36,13 @@ def page_error( error ):
     print error
 
 api = api_call( "http://www.rit.edu/studentaffairs/ritpedia/w/api.php" )
-ubi = ubi_draw()
+try:
+    ubi = ubi_draw()
+except:
+    print "ubigraph server doesn't appear to be running"
+    import sys
+    sys.exit(1)
+
 lc = LoopingCall(scheudle_request).start(update)
 
 reactor.run()
