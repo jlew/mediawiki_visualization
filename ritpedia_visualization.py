@@ -34,10 +34,12 @@ def schedule_request():
 def page_object_received( page_data ):
     if page_data != []:
         global ubi
+        global options
 
         page_links = []
         for edit in page_data:
-            ubi.add_edit( edit['user'], edit['title'] )
+            if options.show_users:
+                ubi.add_edit( edit['user'], edit['title'] )
             page_links.append( edit['title'] )
 
         link_set = list( set( page_links ) )
@@ -66,6 +68,9 @@ parser.add_option("-u", "--ubi_server", dest="ubi_server",
 
 parser.add_option("-i", "--interval", dest="interval", type="int",
     help="Minutes between api calls", metavar="MIN", default=5)
+
+parser.add_option("","--no-users", dest="show_users", action="store_false", default=True,
+                  help="Hide users from visualization")
 
 (options, args) = parser.parse_args()
 
