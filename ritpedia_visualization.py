@@ -22,6 +22,8 @@
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 
+from optparse import OptionParser
+
 from mediawiki_api import api_call
 from ubi_draw import ubi_draw
 
@@ -56,14 +58,30 @@ def page_link_received( links_map ):
 def page_error( error ):
     print error
 
-api = api_call( "http://www.rit.edu/studentaffairs/ritpedia/w/api.php" )
+
+parser = OptionParser()
+parser.add_option("-a", "--api", dest="api_link", help="API Url",
+    metavar="URL", default="http://www.rit.edu/studentaffairs/ritpedia/w/api.php")
+
+parser.add_option("-u", "--ubi_server", dest="ubi_server",
+    help="ubidraw server url", metavar="URL", default="http://localhost:20738/RPC2")
+
+parser.add_option("-i", "--interval", dest="interval", type="int",
+    help="Minutes between api calls", metavar="MIN", default=5)
+
+(options, args) = parser.parse_args()
+
+api = api_call( options.api_link )
+
 try:
-    ubi = ubi_draw()
+    ubi = ubi_draw( options.ubi_server )
 except:
     print "ubigraph server doesn't appear to be running"
     import sys
     sys.exit(1)
 
-lc = LoopingCall(scheudle_request).start(update)
+lc = LoopingCall(scheudle_request).start(options.interval * 60)
 
 reactor.run()
+
+
