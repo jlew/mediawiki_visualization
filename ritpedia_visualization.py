@@ -12,6 +12,12 @@
 #    along with OpenVideoChat.  If not, see <http://www.gnu.org/licenses/>.
 #
 #    Author: Justin Lewis  <jlew.blackout@gmail.com>
+#
+#    I would like to thank Taylor Rose <tjr1351@rit.edu> for initial jumpstart
+#    of twisted reactor.
+#
+#    This project was inspired by Remy DeCausemaker <remyd@civx.us> and
+#    John Shull <jon.schull@rit.edu> of the Student Innovation Center @ RIT
 
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall

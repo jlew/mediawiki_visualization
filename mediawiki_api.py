@@ -12,6 +12,8 @@
 #    along with OpenVideoChat.  If not, see <http://www.gnu.org/licenses/>.
 #
 #    Author: Justin Lewis  <jlew.blackout@gmail.com>
+#
+#    I would like to thank Fran Rogers <fran@dumetella.net> for api support.
 
 from twisted.web.client import getPage
 from twisted.internet import defer
