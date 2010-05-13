@@ -6,7 +6,7 @@ class api_call:
     def __init__(self, api_url, param="?action=query&format=json&list=recentchanges&rclimit=500&rcprop=timestamp|user|title|flags|loginfo"):
         self._api_base_url = api_url
         self._param_list = param
-        self._last_sceen = ""
+        self._last_scene = ""
 
     def schedule_page_request(self):
         d = defer.Deferred()
@@ -17,18 +17,21 @@ class api_call:
         data = json.loads( page )
 
         updates = data['query']['recentchanges']
-        self._last_seen = updates[-1]
 
-        defered_chain.callback( updates )
+        if len( updates ) != 0:
+            self._last_scene = updates[-1]
+
+            defered_chain.callback( updates )
+        else:
+            # This means it is the same update we have seen, send empty array chain
+            defered_chain.callback( [] )
 
     def _page_error(self, error, defered_chain):
         defered_chain.errback( error )
 
     def get_api_param(self):
-        if self._last_sceen != "":
-            print "LAST SEEN:", self._last_sceen
-            return "%s&rcdir=newer&rcstart=%s" % (self._param_list,self._last_sceen)
+        if self._last_scene != "":
+            return "%s&rcdir=newer&rcstart=%s" % (self._param_list,self._last_scene)
         else:
-            print "NO LAST SEEN"
             return self._param_list
 
