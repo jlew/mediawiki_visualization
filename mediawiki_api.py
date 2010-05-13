@@ -2,13 +2,14 @@ from twisted.web.client import getPage
 from twisted.internet import defer
 import json
 
+CHANGE_PARAM = "?action=query&format=json&list=recentchanges&rclimit=500&rcprop=timestamp|user|title|flags|loginfo"
+LINK_PARAM = "?action=query&format=json&prop=links&titles=%s&pllimit=50"
 class api_call:
-    def __init__(self, api_url, param="?action=query&format=json&list=recentchanges&rclimit=500&rcprop=timestamp|user|title|flags|loginfo"):
+    def __init__(self, api_url):
         self._api_base_url = api_url
-        self._param_list = param
         self._last_scene = ""
 
-    def schedule_page_request(self):
+    def schedule_change_request(self):
         """
         gets the page from the api, and then passes the data the _page_received
         callback.
@@ -16,10 +17,17 @@ class api_call:
         Returns a deferred object which _page_received will use as a callback
         """
         d = defer.Deferred()
-        getPage( "%s%s" % (self._api_base_url, self.get_api_param() )).addCallback(self._page_received, d ).addErrback(self._page_error, d)
+        getPage( "%s%s" % (self._api_base_url, self.get_api_param() )).addCallback(self._change_received, d ).addErrback(self._page_error, d)
         return d
 
-    def _page_received(self, page, defered_chain):
+    def schedule_link_request(self, links):
+        link_list = str("|".join(links))
+        d = defer.Deferred()
+        getPage( "%s%s" % (self._api_base_url, LINK_PARAM % link_list )).addCallback(self._link_received, d ).addErrback(self._page_error, d)
+        return d
+
+
+    def _change_received(self, page, defered_chain):
         """
         returns the update data to the defered_chain as a callback.  If no new
         data was found it will pass an empty list to the callback.
@@ -36,6 +44,11 @@ class api_call:
             # This means it is the same update we have seen, send empty array chain
             defered_chain.callback( [] )
 
+    def _link_received(self, page, defered_chain):
+        data = json.loads( page )
+
+        defered_chain.callback( data['query']['pages'] )
+
     def _page_error(self, error, defered_chain):
         """
         Error handler for getPage.  Passes the error as an errback on the defered_chain
@@ -47,7 +60,7 @@ class api_call:
         returns the current param list string
         """
         if self._last_scene != "":
-            return "%s&rcdir=newer&rcstart=%s" % (self._param_list,self._last_scene)
+            return "%s&rcdir=newer&rcstart=%s" % (CHANGE_PARAM,self._last_scene)
         else:
-            return self._param_list
+            return CHANGE_PARAM
 
