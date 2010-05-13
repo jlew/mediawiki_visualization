@@ -1,4 +1,5 @@
 from twisted.web.client import getPage
+from twisted.internet import defer
 import json
 
 class api_call:
@@ -8,19 +9,20 @@ class api_call:
         self._last_sceen = ""
 
     def schedule_page_request(self):
-        return getPage( "%s%s" % (self._api_base_url, self.get_api_param() ) ).addCallbacks(
-            callback=self._page_received, errback=self._page_error)
+        d = defer.Deferred()
+        getPage( "%s%s" % (self._api_base_url, self.get_api_param() )).addCallback(self._page_received, d ).addErrback(self._page_error, d)
+        return d
 
-    def _page_received(self, page):
+    def _page_received(self, page, defered_chain):
         data = json.loads( page )
 
         updates = data['query']['recentchanges']
         self._last_seen = updates[-1]
-        print "PAGE RECIEVED"
-        return updates
 
-    def _page_error(self, error):
-        print "api_call: page_error:", error
+        defered_chain.callback( updates )
+
+    def _page_error(self, error, defered_chain):
+        defered_chain.errback( error )
 
     def get_api_param(self):
         if self._last_sceen != "":

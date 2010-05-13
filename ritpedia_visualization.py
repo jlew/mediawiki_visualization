@@ -5,6 +5,9 @@ from mediawiki_api import api_call
 
 update = 60
 
+def scheudle_request():
+    global api
+    api.schedule_page_request().addCallback(page_received).addErrback(page_error)
 
 def page_received( page ):
     print "PAGE OBJECT",page
@@ -14,7 +17,6 @@ def page_error( error ):
 
 api = api_call( "http://www.rit.edu/studentaffairs/ritpedia/w/api.php" )
 
-lc = LoopingCall(api.schedule_page_request).start(update).addCallbacks(
-            callback=page_received, errback=page_error)
+lc = LoopingCall(scheudle_request).start(update)
 
 reactor.run()
