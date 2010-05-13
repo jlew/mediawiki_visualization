@@ -1,15 +1,15 @@
-#    Mediawiki Visulization is free software: you can redistribute it and/or modify
+#    Mediawiki Visualization is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    MediaWiki Visulization is distributed in the hope that it will be useful,
+#    MediaWiki Visualization is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with OpenVideoChat.  If not, see <http://www.gnu.org/licenses/>.
+#    along with MediaWiki Visualization.  If not, see <http://www.gnu.org/licenses/>.
 #
 #    Author: Justin Lewis  <jlew.blackout@gmail.com>
 #
@@ -27,9 +27,7 @@ from optparse import OptionParser
 from mediawiki_api import api_call
 from ubi_draw import ubi_draw
 
-update = 60
-
-def scheudle_request():
+def schedule_request():
     global api
     api.schedule_change_request().addCallback(page_object_received).addErrback(page_error)
 
@@ -80,7 +78,7 @@ except:
     import sys
     sys.exit(1)
 
-lc = LoopingCall(scheudle_request).start(options.interval * 60)
+lc = LoopingCall(schedule_request).start(options.interval * 60)
 
 reactor.run()
 

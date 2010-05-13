@@ -1,15 +1,15 @@
-#    Mediawiki Visulization is free software: you can redistribute it and/or modify
+#    Mediawiki Visualization is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    MediaWiki Visulization is distributed in the hope that it will be useful,
+#    MediaWiki Visualization is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with OpenVideoChat.  If not, see <http://www.gnu.org/licenses/>.
+#    along with MediaWiki Visualization.  If not, see <http://www.gnu.org/licenses/>.
 #
 #    Author: Justin Lewis  <jlew.blackout@gmail.com>
 #
@@ -46,7 +46,7 @@ class api_call:
 
     def _change_received(self, page, defered_chain):
         """
-        returns the update data to the defered_chain as a callback.  If no new
+        returns the update data to the deferred_chain as a callback.  If no new
         data was found it will pass an empty list to the callback.
         """
         data = json.loads( page )
@@ -68,7 +68,7 @@ class api_call:
 
     def _page_error(self, error, defered_chain):
         """
-        Error handler for getPage.  Passes the error as an errback on the defered_chain
+        Error handler for getPage.  Passes the error as an errback on the deferred_chain
         """
         defered_chain.errback( error )
 
