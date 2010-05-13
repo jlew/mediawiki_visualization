@@ -31,7 +31,7 @@ class ubi_draw:
             self._pages[page] = [self._g.newVertex( label=page ), [], []]
 
         if user not in self._pages[page][1]:
-            self._pages[page][1].append(self._g.newEdge(self._pages[page][0],self._users[user]))
+            self._pages[page][1].append(self._g.newEdge(self._pages[page][0],self._users[user], color="#ffffff", width=2.0))
 
     def add_page_links(self, page, links):
         for link in links:
@@ -46,4 +46,4 @@ class ubi_draw:
             self._pages[b] = [self._g.newVertex( label=b ), [], []]
 
         if  self._pages[b][0] not in self._pages[a][2]:
-            self._pages[a][2].append(self._g.newEdge( self._pages[a][0], self._pages[b][0]))
+            self._pages[a][2].append(self._g.newEdge( self._pages[a][0], self._pages[b][0], color="#ffff00", width=2.0))
