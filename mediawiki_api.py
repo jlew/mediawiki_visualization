@@ -9,11 +9,21 @@ class api_call:
         self._last_scene = ""
 
     def schedule_page_request(self):
+        """
+        gets the page from the api, and then passes the data the _page_received
+        callback.
+
+        Returns a deferred object which _page_received will use as a callback
+        """
         d = defer.Deferred()
         getPage( "%s%s" % (self._api_base_url, self.get_api_param() )).addCallback(self._page_received, d ).addErrback(self._page_error, d)
         return d
 
     def _page_received(self, page, defered_chain):
+        """
+        returns the update data to the defered_chain as a callback.  If no new
+        data was found it will pass an empty list to the callback.
+        """
         data = json.loads( page )
 
         updates = data['query']['recentchanges']
@@ -27,9 +37,15 @@ class api_call:
             defered_chain.callback( [] )
 
     def _page_error(self, error, defered_chain):
+        """
+        Error handler for getPage.  Passes the error as an errback on the defered_chain
+        """
         defered_chain.errback( error )
 
     def get_api_param(self):
+        """
+        returns the current param list string
+        """
         if self._last_scene != "":
             return "%s&rcdir=newer&rcstart=%s" % (self._param_list,self._last_scene)
         else:
