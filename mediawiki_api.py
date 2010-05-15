@@ -54,7 +54,7 @@ class api_call:
         updates = data['query']['recentchanges']
 
         if len( updates ) != 0:
-            self._last_scene = str(updates[-1]['timestamp'])
+            self._last_scene = str(updates[0]['timestamp'])
 
             defered_chain.callback( updates )
         else:
