@@ -19,7 +19,7 @@ from twisted.web.client import getPage
 from twisted.internet import defer
 import json
 import os
-from time import time
+from time import time, strftime, localtime, strptime
 
 CHANGE_PARAM = "?action=query&format=json&list=recentchanges&rclimit=500&rcprop=timestamp|user|title|flags|loginfo"
 LINK_PARAM = "?action=query&format=json&prop=links&titles=%s&pllimit=50"
@@ -48,6 +48,7 @@ class api_call:
 
         Returns a deferred object which _page_received will use as a callback
         """
+
         d = defer.Deferred()
         getPage( "%s%s" % (self._api_base_url, self.get_api_param() )).addCallback(self._change_received, d ).addErrback(self._page_error, d)
         return d
@@ -69,7 +70,15 @@ class api_call:
         updates = data['query']['recentchanges']
 
         if len( updates ) != 0:
-            self._last_scene = str(updates[0]['timestamp'])
+
+            # Time to time struct
+            update_time = strptime(updates[0]['timestamp'],'%Y-%m-%dT%H:%M:%SZ')
+            
+            # Time struct to epoch + 1
+            update_epoch = int(strftime( "%s" , update_time )) + 1 
+
+            # Convert back for mediawiki api
+            self._last_scene = strftime( '%Y-%m-%dT%H:%M:%SZ', localtime(update_epoch) )
 
             self._cache_add( 'edits', page )
             defered_chain.callback( updates )
