@@ -21,14 +21,23 @@ class ubi_draw:
         self._g.clear()
         self._users = {}
         self._pages = {}
+        self._node_clear = []
 
     def add_edit(self, user, page):
 
         if not self._users.has_key( user ):
             self._users[user] = self._g.newVertex(shape="octahedron", color="#ff0000", label=user)
+        else:
+            self._users[user].set( label=user )
+
+        self._node_clear.append( self._users[user] )
 
         if not self._pages.has_key(page):
             self._pages[page] = [self._g.newVertex( label=page ), [], []]
+        else:
+            self._pages[page][0].set( label=page )
+
+        self._node_clear.append( self._pages[page][0] )
 
         if user not in self._pages[page][1]:
             self._pages[page][1].append(self._g.newEdge(self._pages[page][0],self._users[user], color="#ffffff", width=2.0))
@@ -41,9 +50,22 @@ class ubi_draw:
     def page_to_page( self, a, b ):
         if not self._pages.has_key(a):
             self._pages[a] = [self._g.newVertex( label=a ), [], []]
+        else:
+            self._pages[a][0].set( label = a )
+
+        self._node_clear.append( self._pages[a][0] )
 
         if not self._pages.has_key(b):
             self._pages[b] = [self._g.newVertex( label=b ), [], []]
+        else:
+            self._pages[b][0].set( label=b )
+
+        self._node_clear.append( self._pages[b][0] )
 
         if  self._pages[b][0] not in self._pages[a][2]:
             self._pages[a][2].append(self._g.newEdge( self._pages[a][0], self._pages[b][0], color="#ffff00", width=2.0))
+
+    def do_label_clear(self):
+        for node in self._node_clear:
+            node.set( label="" )
+        self._node_clear = []

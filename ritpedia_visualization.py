@@ -32,11 +32,14 @@ def schedule_request():
     api.schedule_change_request().addCallback(page_object_received).addErrback(page_error)
 
 def page_object_received( page_data ):
+
+    global ubi
+    ubi.do_label_clear()
     if page_data != []:
-        global ubi
         global options
 
         page_links = []
+
         for edit in page_data:
             if options.show_users:
                 ubi.add_edit( edit['user'], edit['title'] )
