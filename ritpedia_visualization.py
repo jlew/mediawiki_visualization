@@ -25,7 +25,7 @@ from twisted.internet.task import LoopingCall
 from optparse import OptionParser
 
 from mediawiki_api import api_call
-from ubi_draw import ubi_draw
+from graph import graph
 
 def schedule_request():
     global api
@@ -33,8 +33,8 @@ def schedule_request():
 
 def page_object_received( page_data ):
 
-    global ubi
-    ubi.do_label_clear()
+    global the_graph
+    the_graph.do_label_clear()
     if page_data != []:
         global options
 
@@ -42,21 +42,24 @@ def page_object_received( page_data ):
 
         for edit in page_data:
             if options.show_users:
-                ubi.add_edit( edit['user'], edit['title'] )
+                the_graph.add_edit( edit['user'], edit['title'] )
             page_links.append( edit['title'] )
 
         link_set = list( set( page_links ) )
 
         global api
-        for x in range(0, len( link_set ), 10):
-            api.schedule_link_request( link_set[x:x+10] ).addCallback( page_link_received ).addErrback(page_error)
+        api.schedule_link_request( link_set ).addCallback( page_link_received ).addErrback(page_error)
 
 def page_link_received( links_map ):
-    global ubi
+    global the_graph
     for page in links_map.values():
         if page.has_key('links'):
-            ubi.add_page_links( page['title'], page['links'] )
+            link_list = []
 
+            for link in page['links']:
+                link_list.append( link['title'] )
+
+            the_graph.add_links( page['title'], link_list )
 
 def page_error( error ):
     print error
@@ -79,10 +82,15 @@ parser.add_option("","--no-users", dest="show_users", action="store_false", defa
 
 api = api_call( options.api_link )
 
+the_graph = graph()
+
+
 try:
-    ubi = ubi_draw( options.ubi_server )
+    the_graph.connect_ubigraph( options.ubi_server )
 except:
     print "ubigraph server doesn't appear to be running"
+
+    # TODO: UBIGRAPH NOT REQUIRED, recover?
     import sys
     sys.exit(1)
 
