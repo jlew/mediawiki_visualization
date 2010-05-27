@@ -32,7 +32,6 @@ def schedule_request():
     api.schedule_change_request().addCallback(page_object_received).addErrback(page_error)
 
 def page_object_received( page_data ):
-
     global the_graph
     the_graph.do_label_clear()
     if page_data != []:
@@ -60,6 +59,22 @@ def page_link_received( links_map ):
                 link_list.append( link['title'] )
 
             the_graph.add_links( page['title'], link_list )
+
+def page_list_received( page_list ):
+    global the_graph
+
+    page_links = []
+    for page in page_list:
+        the_graph.add_unknown_page( page['title'] )
+        page_links.append( page['title'] )
+
+    link_set = list( set( page_links ) )
+    global api
+
+    for x in range(0, len( link_set ), 10):
+        api.schedule_link_request( link_set[x:x+10] ).addCallback( page_link_received ).addErrback(page_error)
+    #api.schedule_link_request( link_set ).addCallback( page_link_received ).addErrback(page_error)
+
 
 def page_error( error ):
     print error
@@ -93,6 +108,10 @@ except:
     # TODO: UBIGRAPH NOT REQUIRED, recover?
     import sys
     sys.exit(1)
+
+print "Requesting for all pages in wiki"
+api.schedule_page_list().addCallback(page_list_received)
+
 
 lc = LoopingCall(schedule_request).start(options.interval * 60)
 

@@ -23,6 +23,8 @@ from time import time, strftime, localtime, strptime
 
 CHANGE_PARAM = "?action=query&format=json&list=recentchanges&rclimit=500&rcprop=timestamp|user|title|flags|loginfo"
 LINK_PARAM = "?action=query&format=json&prop=links&titles=%s&pllimit=50"
+LIST_PAGES = "?action=query&format=json&list=allpages&aplimit=500&apfrom=%s"
+
 class api_call:
     def __init__(self, api_url, cache="./cache"):
         self._api_base_url = api_url
@@ -53,6 +55,14 @@ class api_call:
         getPage( "%s%s" % (self._api_base_url, self.get_api_param() )).addCallback(self._change_received, d ).addErrback(self._page_error, d)
         return d
 
+
+    def schedule_page_list(self, apifrom="", d=None, data=[]):
+        if not d:
+            d = defer.Deferred()
+
+        getPage( "%s%s" % (self._api_base_url, LIST_PAGES % apifrom )).addCallback(self._page_list_received, d, data ).addErrback(self._page_error, d)
+        return d
+
     def schedule_link_request(self, links):
         link_list = str("|".join(links))
         d = defer.Deferred()
@@ -73,9 +83,9 @@ class api_call:
 
             # Time to time struct
             update_time = strptime(updates[0]['timestamp'],'%Y-%m-%dT%H:%M:%SZ')
-            
+
             # Time struct to epoch + 1
-            update_epoch = int(strftime( "%s" , update_time )) + 1 
+            update_epoch = int(strftime( "%s" , update_time )) + 1
 
             # Convert back for mediawiki api
             self._last_scene = strftime( '%Y-%m-%dT%H:%M:%SZ', localtime(update_epoch) )
@@ -92,6 +102,17 @@ class api_call:
         self._cache_add( 'links', page )
 
         defered_chain.callback( data['query']['pages'] )
+
+    def _page_list_received(self, page, defered_chain, data):
+        query_results = json.loads( page )
+
+        for page_data in query_results['query']['allpages']:
+            data.append( page_data )
+
+        if query_results.has_key("query-continue"):
+            self.schedule_page_list( str(query_results['query-continue']['allpages']['apfrom']), defered_chain, data )
+        else:
+            defered_chain.callback( data )
 
     def _page_error(self, error, defered_chain):
         """

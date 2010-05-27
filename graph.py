@@ -22,9 +22,10 @@ PAGE_NEW_COLOR="#ffff00"
 PAGE_EDIT_COLOR="#00ff00"
 PAGE_IDLE_COLOR="#ffffff"
 PAGE_SHAPE="sphere"
+PAGE_UN_SHAPE="icosahedron"
 
 EDGE_EDIT_COLOR="#ffffff"
-EDGE_LINK_COLOR="#0000ff"
+EDGE_LINK_COLOR="#ff0000"
 
 class graph:
     def __init__(self):
@@ -51,10 +52,10 @@ class graph:
         else:
             self.__graph.set_node_attr( page, label=str(user), color=PAGE_EDIT_COLOR )
         self.__node_updated.append(page)
-        
+
         # Add Edge
         self.__graph.add_edge( user, page, "EDIT", color=EDGE_EDIT_COLOR )
-        
+
     def add_edge( self, a, b ):
         self.__graph.add_edge(a, b)
 
@@ -63,7 +64,8 @@ class graph:
             self.__graph.add_node( a, color=PAGE_NEW_COLOR, shape=PAGE_SHAPE )
             self.__graph[a]['ndtype'] = "PAGE"
         else:
-            self.__graph.set_node_attr( a, label=str(a), color=PAGE_EDIT_COLOR )
+            self.__graph.set_node_attr( a, label=str(a), color=PAGE_EDIT_COLOR, shape=PAGE_SHAPE )
+
         self.__node_updated.append(a)
 
         for link in b:
@@ -75,11 +77,16 @@ class graph:
             self.__node_updated.append(link)
             self.__graph.add_edge( a, link, "LINK", color=EDGE_LINK_COLOR )
 
+    def add_unknown_page(self, page):
+        self.__graph.add_node( page, color=PAGE_IDLE_COLOR, shape=PAGE_UN_SHAPE )
+        self.__graph[page]['ndtype'] = "PAGE"
+        self.__node_updated.append(page)
+
     def do_label_clear(self):
         for node in self.__node_updated:
             self.__graph.set_node_attr( node, label="" )
 
             if self.__graph[node]['ndtype'] == "PAGE":
                 self.__graph.set_node_attr( node, color=PAGE_IDLE_COLOR )
-            
+
         self._node_clear = []
