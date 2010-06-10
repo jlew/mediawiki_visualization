@@ -33,7 +33,16 @@ class graph:
         self.__node_updated = []
 
     def connect_ubigraph(self, server=None):
-        self.__graph = nx.UbiGraph(self.__graph, ubigraph_server=server)
+        try:
+            self.__graph = nx.UbiGraph(self.__graph, ubigraph_server=server)
+        except:
+           print """
+           It looks like you are using a version of networkx that has removed
+           support for ubigraph.  I will attempt to load a copy of the old
+           class.
+           """
+           from ubigraph import UbiGraph 
+           self.__graph = UbiGraph(self.__graph, ubigraph_server=server)
         self.__graph.node_labels()
 
     def add_edit(self, user, page):
